@@ -10,6 +10,9 @@ const BLOCK_SIZE = 1u;
 #elif defined(Q4_0) || defined(Q4_1) || defined(Q5_0) || defined(Q5_1) || defined(Q8_0) || defined(Q8_1) || defined(IQ4_NL)
 const BLOCK_SIZE = 32u;
 
+#elif defined(Q2_0)
+const BLOCK_SIZE = 128u;
+
 #elif defined(Q2_K) || defined(Q3_K) || defined(Q4_K) || defined(Q5_K) || defined(Q6_K) || defined(IQ2_XXS) || defined(IQ2_XS) || defined(IQ2_S) || defined(IQ3_XXS) || defined(IQ3_S) || defined(IQ1_S) || defined(IQ1_M) || defined(IQ4_XS)
 const BLOCK_SIZE = 256u;
 #endif
@@ -17,6 +20,27 @@ const BLOCK_SIZE = 256u;
 #ifdef FLOAT
 fn multiply_add(src0_idx_base: u32, src1_idx_base: u32, offset: u32) -> f32 {
     return f32(src0[src0_idx_base + offset]) * f32(src1[src1_idx_base + offset]);
+}
+#endif
+
+#ifdef Q2_0
+fn multiply_add(src0_idx_base: u32, src1_idx_base: u32, offset: u32) -> f32 {
+    let block_byte_base = (src0_idx_base + offset) * 34u;
+    let d = load_f16_as_f32_at_src0(block_byte_base);
+    var sum: f32 = 0.0;
+    for (var j: u32 = 0u; j < 8u; j++) {
+        let q_packed = load_u32_at_src0(block_byte_base + 2u + j * 4u);
+        let src1_base = src1_idx_base + offset * 128u + j * 16u;
+        for (var k: u32 = 0u; k < 4u; k++) {
+            let q_byte = get_byte(q_packed, k);
+            for (var bit_pair: u32 = 0u; bit_pair < 4u; bit_pair++) {
+                let q = (q_byte >> (bit_pair * 2u)) & 3u;
+                let w = f32(i32(q) - 1) * d;
+                sum += w * f32(src1[src1_base + k * 4u + bit_pair]);
+            }
+        }
+    }
+    return sum;
 }
 #endif
 

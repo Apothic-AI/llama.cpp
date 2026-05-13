@@ -1439,6 +1439,7 @@ class ggml_webgpu_shader_lib {
 
                     switch (key.src_type) {
                         case GGML_TYPE_Q1_0:
+                        case GGML_TYPE_Q2_0:
                         case GGML_TYPE_Q4_0:
                         case GGML_TYPE_Q5_0:
                         case GGML_TYPE_Q8_0:
@@ -1477,7 +1478,7 @@ class ggml_webgpu_shader_lib {
 
                     defines.push_back("DST_TYPE=f32");
 
-                    if (key.src_type == GGML_TYPE_Q1_0) {
+                    if (key.src_type == GGML_TYPE_Q1_0 || key.src_type == GGML_TYPE_Q2_0) {
                         defines.push_back("BLOCK_SIZE=128u");
                     } else if ((key.src_type >= GGML_TYPE_Q4_0 && key.src_type <= GGML_TYPE_Q8_1) ||
                                key.src_type == GGML_TYPE_IQ4_NL || key.src_type == GGML_TYPE_MXFP4) {
@@ -1824,7 +1825,7 @@ class ggml_webgpu_shader_lib {
         uint32_t wg_size        = WEBGPU_MUL_MAT_VEC_WG_SIZE;
         uint32_t outputs_per_wg = WEBGPU_MUL_MAT_VEC_FLOAT_OUTPUTS_PER_WG;
 
-        if (key.src0_type == GGML_TYPE_Q1_0) {
+        if (key.src0_type == GGML_TYPE_Q1_0 || key.src0_type == GGML_TYPE_Q2_0) {
             outputs_per_wg = WEBGPU_MUL_MAT_VEC_LEGACY_Q_OUTPUTS_PER_WG;
         } else if (key.src0_type >= GGML_TYPE_Q2_K) {
             outputs_per_wg = WEBGPU_MUL_MAT_VEC_K_Q_OUTPUTS_PER_WG;
@@ -2057,6 +2058,7 @@ class ggml_webgpu_shader_lib {
 
                     switch (context.src0->type) {
                         case GGML_TYPE_Q4_0:
+                        case GGML_TYPE_Q2_0:
                         case GGML_TYPE_Q5_0:
                         case GGML_TYPE_Q8_0:
                         case GGML_TYPE_Q3_K:
@@ -2332,7 +2334,7 @@ class ggml_webgpu_shader_lib {
         uint32_t wg_size        = WEBGPU_MUL_MAT_VEC_WG_SIZE;
         uint32_t outputs_per_wg = WEBGPU_MUL_MAT_VEC_FLOAT_OUTPUTS_PER_WG;
 
-        if (key.src0_type == GGML_TYPE_Q1_0) {
+        if (key.src0_type == GGML_TYPE_Q1_0 || key.src0_type == GGML_TYPE_Q2_0) {
             outputs_per_wg = WEBGPU_MUL_MAT_VEC_LEGACY_Q_OUTPUTS_PER_WG;
         } else if (key.src0_type >= GGML_TYPE_Q2_K) {
             outputs_per_wg = WEBGPU_MUL_MAT_VEC_K_Q_OUTPUTS_PER_WG;
