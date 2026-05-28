@@ -40,6 +40,16 @@
 #include <TargetConditionals.h>
 #endif
 
+#if defined(__ANDROID__)
+#    if !defined(POSIX_MADV_WILLNEED) && defined(MADV_WILLNEED)
+#        define POSIX_MADV_WILLNEED MADV_WILLNEED
+#    endif
+#    if !defined(POSIX_MADV_RANDOM) && defined(MADV_RANDOM)
+#        define POSIX_MADV_RANDOM MADV_RANDOM
+#    endif
+#    define posix_madvise(addr, len, advice) madvise(addr, len, advice)
+#endif
+
 #ifdef _WIN32
 #    define llama_mmap_ftell _ftelli64
 #    define llama_mmap_fseek _fseeki64
